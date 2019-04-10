@@ -5,7 +5,6 @@
 #SBATCH --cpus-per-task=20		### number of CPUs (or cores) per task (same as -c)
 #SBATCH --mem=32G			### memory required per node - amount of memory (in bytes)
 #SBATCH --job-name filterPrimers	### you can give your job a name for easier identification (same as -J)
-#SBATCH -A colej			### buy-in nodes
 
 cd ${SLURM_SUBMIT_DIR}
 
