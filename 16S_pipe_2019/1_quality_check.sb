@@ -28,7 +28,6 @@
 #SBATCH --cpus-per-task=10				### number of CPUs (or cores) per task (same as -c)
 #SBATCH --mem=16G					### memory required per node - amount of memory (in bytes)
 #SBATCH --job-name prefiltering				### you can give your job a name for easier identification (same as -J)
-#SBATCH -A colej					### buy-in nodes
 
 # loading modules
 module load FastQC/0.11.7-Java-1.8.0_162
