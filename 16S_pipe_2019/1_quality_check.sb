@@ -1,0 +1,55 @@
+#!/bin/bash -login
+
+##################################
+#     Bioinformatic pipeline     #
+#     ITS amplicon sequences	 #
+#       Course PLP847 2018	 #
+# 	Advanced Mycology	 #
+#     ----------------------     #
+#         quality check 	 #
+#                                #
+#      Gian MN Benucci, PhD      #
+#        benucci@msu.edu	 #
+#    Michigan State University   #
+##################################
+
+
+#   Before you start!
+# - Make sure your *R1.fastq.gz and *R2.fastq.gz reads
+#   are in a forlder named raw_reads
+# - Make sure you have an indexed Phix genome by putting
+#   the folder "phix_index" in your working (or home/) directory
+
+
+########## Define Resources Needed with SBATCH Lines ##########
+ 
+#SBATCH --time=02:00:00					### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=10				### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=16G					### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name prefiltering				### you can give your job a name for easier identification (same as -J)
+#SBATCH -A colej					### buy-in nodes
+
+# loading modules
+module load FastQC/0.11.7-Java-1.8.0_162
+
+module load icc/2018.1.163-GCC-6.4.0-2.28
+module load ifort/2018.1.163-GCC-6.4.0-2.28
+module load impi/2018.1.163
+
+module load Bowtie2/2.3.4.1
+
+cd ${SLURM_SUBMIT_DIR}
+
+# create a directory for stats reports
+mkdir stats
+
+cd raw_reads/
+
+for i in *.fastq
+do echo "$i : `grep -c "^+$" $i`"
+done > ../stats/reads_raw.txt
+
+fastqc ./*R1_001.fastq
+fastqc ./*R2_001.fastq 
+

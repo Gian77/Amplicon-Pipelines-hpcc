@@ -1,0 +1,19 @@
+#!/bin/bash -login
+
+#SBATCH --time=04:00:00					### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=20				### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G					### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name constax				### you can give your job a name for easier identification (same as -J)
+#SBATCH -A colej					### priority  nodes
+
+cd ${SLURM_SUBMIT_DIR}
+
+mkdir taxonomy_assignments
+
+# java -Xmx10g -jar /RDPTools/classifier.jar train -o training_files -s DB/${base}__RDP_trained.fasta -t DB/${base}__RDP_taxonomy_trained.txt
+# /mnt/research/rdp/public/RDPTools/classifier/samplefiles/rRNAClassifier.properties
+
+java -Xmx10g -jar /mnt/research/rdp/public/RDPTools/classifier.jar classify -c 0.8 -g 16srrna -f allrank -o taxonomy_assignments/otus_taxonomy_RDP.rdp clustered_OTU_ESV/otus.fasta
+java -Xmx10g -jar /mnt/research/rdp/public/RDPTools/classifier.jar classify -c 0.8 -g 16srrna -f allrank -o taxonomy_assignments/zotus_taxonomy_RDP.rdp clustered_OTU_ESV/zotus.fasta
+

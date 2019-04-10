@@ -1,0 +1,33 @@
+#!/bin/bash -login
+ 
+#SBATCH --time=07:00:00					### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=20				### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G					### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name clustering				### you can give your job a name for easier identification (same as -J)
+#SBATCH -A colej
+
+cd ${SLURM_SUBMIT_DIR}
+
+module load GCC/5.4.0-2.26  OpenMPI/1.10.3-CUDA
+module load seqtk
+module load vsearch/2.9.1
+
+mkdir clustered_OTU_ESV/
+
+# dereplication 
+#/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastx_uniques filtered/filtered.fastq -fastqout clustered_OTU_ESV/uniques.fastq -sizeout
+
+#seqtk seq -aQ64 clustered_OTU_ESV/uniques.fastq >  clustered_OTU_ESV/uniques.fasta
+#seqtk sample -s400 clustered_OTU_ESV/uniques.fasta 500 > clustered_OTU_ESV/sub_uniques.fasta
+#/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastq_eestats2 clustered_OTU_ESV/uniques.fastq -output stats/eestats2_uniques.txt -length_cutoffs 100,500,1
+#vsearch -fastq_stats clustered_OTU_ESV/uniques.fastq -log stats/stats_results_uniques.txt
+
+# UNOISE3 ESV -zero radius OTUs
+#/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -unoise3 clustered_OTU_ESV/uniques.fastq -tabbedout clustered_OTU_ESV/unoise_zotus.txt -zotus clustered_OTU_ESV/zotus.fasta
+#/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -otutab filtered/filtered.fastq -zotus clustered_OTU_ESV/zotus.fasta -otutabout clustered_OTU_ESV/otu_table_ITS_UNOISE.txt
+
+#UPARSE 97% OTUs
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -cluster_otus clustered_OTU_ESV/uniques.fastq -minsize 2 -otus clustered_OTU_ESV/otus.fasta -uparseout clustered_OTU_ESV/uparse_otus.txt -relabel OTU_ --threads 20
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -otutab filtered/filtered.fastq -otus clustered_OTU_ESV/otus.fasta -otutabout clustered_OTU_ESV/otu_table_ITS_UPARSE.txt
+

@@ -1,0 +1,20 @@
+#!/bin/bash -login
+ 
+#SBATCH --time=02:30:00					### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=10				### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G					### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name stats				### you can give your job a name for easier identification (same as -J)
+#SBATCH -A colej                                        ### buy-in nodes
+
+module load GCC/5.4.0-2.26  OpenMPI/1.10.3-CUDA
+module load seqtk
+module load FastQC/0.11.7-Java-1.8.0_162
+module load vsearch/2.9.1
+
+cd ${SLURM_SUBMIT_DIR}
+
+vsearch -fastq_stats stripped_paired/stripped_paired_filtered.fastq -log stats/stats_results_filt.txt
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastq_eestats2 stripped_paired/stripped_paired_filtered.fastq -output stats/eestats2_filt.txt -length_cutoffs 100,500,1
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastx_info stripped_paired/stripped_paired_filtered.fastq -secs 5 -output stats/fastxinfo_filt.txt
+

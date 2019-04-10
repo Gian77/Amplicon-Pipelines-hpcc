@@ -1,0 +1,19 @@
+#!/bin/bash -login
+
+#SBATCH --time=05:00:00			### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=2			### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=10		### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G			### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name prefiltering		### you can give your job a name for easier identification (same as -J)
+
+cd ${SLURM_SUBMIT_DIR}
+
+conda activate qiime1
+
+split_libraries_fastq.py -i ../merged.assembled.fastq -b ../filtered_index.fastq -m mapping_16s.txt --barcode_type 10 -q 19 --store_demultiplexed_fastq  --rev_comp_mapping_barcodes --max_barcode_errors 0 -o demultiplexed
+
+sed '/^@/s/_/\./g' "demultiplexed/seqs.fastq" > "demultiplexed/seqs_new.fastq"
+sed '/^>/s/_/\./g' "demultiplexed/seqs.fna" > "demultiplexed/seqs_new.fasta"
+
+conda deactivate
+

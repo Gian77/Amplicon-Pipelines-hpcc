@@ -1,0 +1,34 @@
+#!/bin/bash -login
+ 
+#SBATCH --time=02:30:00			### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1			### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=20		### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G			### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name filterPrimers	### you can give your job a name for easier identification (same as -J)
+#SBATCH -A colej			### buy-in nodes
+
+cd ${SLURM_SUBMIT_DIR}
+
+conda activate cutadapt
+
+515F= GTGCCAGCMGCCGCGGTAA
+806R_rc= ATTAGAWACCCBDGTAGTCC
+
+cutadapt -g "CMGCCGCGGTAA;min_overlap=10" -a "ATTAGAWACCCBDGTAGTCC;min_overlap=10" -e 0.1 -f fastq -n 2 --match-read-wildcards -o stripped_paired/stripped_paired_filtered.fastq stripped_paired/stripped_paired.fastq
+
+conda deactivate
+
+module load GCC/5.4.0-2.26  OpenMPI/1.10.3-CUDA
+module load seqtk
+
+seqtk sample -s200 stripped_paired/stripped_paired_filtered.fastq 500 > stripped_paired/sub_stripped_paired_filtered.fastq
+seqtk seq -aQ64 stripped_paired/sub_stripped_paired_filtered.fastq > stripped_paired/sub_stripped_paired_filtered.fasta
+
+for fastq in stripped_paired/*.fastq                                                                           
+do echo "$fastq : `grep -c "^+$" $fastq`" 
+done > ../stats/stripped_filtered.counts
+
+# -n trimming more than one adapter each read
+# -e expected error rate (default 10%)
+# --discard-untrimmed discards the pair if one of the reads does not contain an adapter
+# --match-read-wildcards All IUPAC nucleotide codes (wildcard characters) are supported

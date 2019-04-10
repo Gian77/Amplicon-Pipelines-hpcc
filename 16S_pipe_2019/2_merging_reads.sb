@@ -1,0 +1,21 @@
+#!/bin/bash -login
+
+#SBATCH --time=05:00:00			### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=2			### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=10		### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G			### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name prefiltering		### you can give your job a name for easier identification (same as -J)
+
+cd ${SLURM_SUBMIT_DIR}
+
+conda activate py2
+
+#pear -f no_phix/*_pairs_R1.fastq -r no_phix/*_pairs_R2.fastq -n 100 -v10 -j 20 -y 32G -u 0 -p 0.01 -o merged
+pear -f raw_reads/*_R1_001.fastq -r raw_reads/*_R2_001.fastq -n 50 -v10 -j 20 -y 32G -u 0 -p 0.01 -o merged
+
+
+#/mnt/research/rdp/public/thirdParty/usearch10.0.240_i86linux64 -fastq_mergepairs raw_reads/*_R1_001.fastq -reverse raw_reads/*_R2_001.fastq -fastq_minmergelen 50 -relabel @ -fastqout assembled.fastq
+
+python python_scripts/match_index2reads_fastq.py merged.assembled.fastq raw_reads/*_I1_001.fastq
+
+conda deactivate
