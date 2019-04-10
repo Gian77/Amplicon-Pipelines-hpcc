@@ -5,7 +5,6 @@
 #SBATCH --cpus-per-task=20				### number of CPUs (or cores) per task (same as -c)
 #SBATCH --mem=32G					### memory required per node - amount of memory (in bytes)
 #SBATCH --job-name clustering				### you can give your job a name for easier identification (same as -J)
-#SBATCH -A colej
 
 cd ${SLURM_SUBMIT_DIR}
 
