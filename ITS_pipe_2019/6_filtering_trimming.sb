@@ -1,0 +1,29 @@
+#!/bin/bash -login
+ 
+#SBATCH --time=02:30:00					### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=10				### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G					### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name stats				### you can give your job a name for easier identification (same as -J)
+
+module load GCC/5.4.0-2.26  OpenMPI/1.10.3-CUDA
+module load seqtk
+module load FastQC/0.11.7-Java-1.8.0_162
+
+cd ${SLURM_SUBMIT_DIR}
+
+mkdir filtered
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastq_filter stripped/trimmed_R1.fastq -fastq_maxee 1.0 -fastq_trunclen 200 -fastq_maxns 0 -fastqout filtered/filtered_R1.fastq
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastq_filter stripped/trimmed_R2.fastq -fastq_maxee 1.0 -fastq_trunclen 200 -fastq_maxns 0 -fastqout filtered/filtered_R2.fastq
+
+fastqc ./filtered/filtered_R1.fastq
+fastqc ./filtered/filtered_R2.fastq
+
+
+
+
+
+
+

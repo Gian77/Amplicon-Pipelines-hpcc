@@ -1,0 +1,29 @@
+#!/bin/bash -login
+ 
+#SBATCH --time=04:00:00					### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=20				### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G					### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name clustering				### you can give your job a name for easier identification (same as -J)
+
+cd ${SLURM_SUBMIT_DIR}
+
+mkdir clustered_OTU_ESV/
+
+# dereplication 
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastx_uniques filtered/filtered_R1.fastq -fastaout clustered_OTU_ESV/uniques_R1.fasta -sizeout
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -fastx_uniques filtered/filtered_R2.fastq -fastaout clustered_OTU_ESV/uniques_R2.fasta -sizeout
+
+# UNOISE3 ESV -zero radius OTUs
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -unoise3 clustered_OTU_ESV/uniques_R1.fasta -tabbedout clustered_OTU_ESV/unoise_zotus_R1.txt -zotus clustered_OTU_ESV/zotus_R1.fasta
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -otutab filtered/filtered_R1.fastq -zotus clustered_OTU_ESV/zotus_R1.fasta -otutabout clustered_OTU_ESV/otu_table_ITS_UNOISE_R1.txt
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -unoise3 clustered_OTU_ESV/uniques_R2.fasta -tabbedout clustered_OTU_ESV/unoise_zotus_R2.txt -zotus clustered_OTU_ESV/zotus_R2.fasta
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -otutab filtered/filtered_R2.fastq -zotus clustered_OTU_ESV/zotus_R2.fasta -otutabout clustered_OTU_ESV/otu_table_ITS_UNOISE_R2.txt 
+
+#UPARSE 97% OTUs
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -cluster_otus clustered_OTU_ESV/uniques_R1.fasta -minsize 2 -otus clustered_OTU_ESV/otus_R1.fasta -uparseout clustered_OTU_ESV/uparse_otus_R1.txt -relabel OTU_ --threads 20
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -otutab filtered/filtered_R1.fastq -otus clustered_OTU_ESV/otus_R1.fasta -otutabout clustered_OTU_ESV/otu_table_ITS_UPARSE_R1.txt
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -cluster_otus clustered_OTU_ESV/uniques_R2.fasta -minsize 2 -otus clustered_OTU_ESV/otus_R2.fasta -uparseout clustered_OTU_ESV/uparse_otus_R2.txt -relabel OTU_ --threads 20
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -otutab filtered/filtered_R2.fastq -otus clustered_OTU_ESV/otus_R2.fasta -otutabout clustered_OTU_ESV/otu_table_ITS_UPARSE_R2.txt
+
+

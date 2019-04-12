@@ -1,0 +1,41 @@
+#!/bin/bash -login
+
+#SBATCH --time=04:00:00					### limit of wall clock time - how long the job will run (same as -t)
+#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
+#SBATCH --cpus-per-task=20				### number of CPUs (or cores) per task (same as -c)
+#SBATCH --mem=32G					### memory required per node - amount of memory (in bytes)
+#SBATCH --job-name constax				### you can give your job a name for easier identification (same as -J)
+
+cd ${SLURM_SUBMIT_DIR}
+
+conda activate py2
+
+sed -i '7s/.*/otu_file="otus_R1.fasta"/' /mnt/home/benucci/CONSTAX_test/config
+cp clustered_OTU_ESV/otus_R1.fasta /mnt/home/benucci/CONSTAX_test/otus/
+cd /mnt/home/benucci/CONSTAX_test/
+sh constax.sh
+mv /mnt/home/benucci/CONSTAX_test/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/
+mv /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs_ITS_UPARSE_R1/
+
+sed -i '7s/.*/otu_file="otus_R2.fasta"/' /mnt/home/benucci/CONSTAX_test/config
+cp /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/clustered_OTU_ESV/otus_R2.fasta /mnt/home/benucci/CONSTAX_test/otus/
+cd /mnt/home/benucci/CONSTAX_test/
+sh constax.sh
+mv /mnt/home/benucci/CONSTAX_test/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/
+mv /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs_ITS_UPARSE_R2/
+
+sed -i '7s/.*/otu_file="zotus_R1.fasta"/' /mnt/home/benucci/CONSTAX_test/config
+cp /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/clustered_OTU_ESV/zotus_R1.fasta /mnt/home/benucci/CONSTAX_test/otus/
+cd /mnt/home/benucci/CONSTAX_test/
+sh constax.sh
+mv /mnt/home/benucci/CONSTAX_test/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/
+mv /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs_ITS_UNOISE_R1/
+
+sed -i '7s/.*/otu_file="zotus_R2.fasta"/' /mnt/home/benucci/CONSTAX_test/config
+cp /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/clustered_OTU_ESV/zotus_R2.fasta /mnt/home/benucci/CONSTAX_test/otus/
+cd /mnt/home/benucci/CONSTAX_test/
+sh constax.sh
+mv /mnt/home/benucci/CONSTAX_test/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/
+mv /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs/ /mnt/home/benucci/miseq_ITS_deep_core_GLBRC/ITS_comparison/outputs_ITS_UNOISE_R2/
+
+conda deactivate
