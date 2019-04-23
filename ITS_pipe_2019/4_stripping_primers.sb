@@ -28,7 +28,7 @@ seqtk seq -aQ64 stripped/sub_stripped_R2.fastq > stripped/sub_stripped_R2.fasta
 
 for fastq in stripped/*.fastq                                                                           
 do echo "$fastq : `grep -c "^+$" $fastq`" 
-done > ../stats/stripped.counts
+done > stats/stripped.counts
 
 # -n trimming more than one adapter each read
 # -e expected error rate (default 10%)
