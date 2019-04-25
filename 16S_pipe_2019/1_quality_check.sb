@@ -47,7 +47,7 @@ cd raw_reads/
 
 for i in *.fastq
 do echo "$i : `grep -c "^+$" $i`"
-done > ../stats/reads_raw.txt
+done > stats/reads_raw.txt
 
 fastqc ./*R1_001.fastq
 fastqc ./*R2_001.fastq 
