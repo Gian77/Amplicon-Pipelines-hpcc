@@ -25,7 +25,7 @@ seqtk seq -aQ64 stripped_paired/sub_stripped_paired_filtered.fastq > stripped_pa
 
 for fastq in stripped_paired/*.fastq                                                                           
 do echo "$fastq : `grep -c "^+$" $fastq`" 
-done > ../stats/stripped_filtered.counts
+done > stats/stripped_filtered.counts
 
 # -n trimming more than one adapter each read
 # -e expected error rate (default 10%)
