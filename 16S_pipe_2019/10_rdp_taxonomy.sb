@@ -16,3 +16,17 @@ mkdir taxonomy_assignments
 java -Xmx10g -jar /mnt/research/rdp/public/RDPTools/classifier.jar classify -c 0.8 -g 16srrna -f allrank -o taxonomy_assignments/otus_taxonomy_RDP.rdp clustered_OTU_ESV/otus.fasta
 java -Xmx10g -jar /mnt/research/rdp/public/RDPTools/classifier.jar classify -c 0.8 -g 16srrna -f allrank -o taxonomy_assignments/zotus_taxonomy_RDP.rdp clustered_OTU_ESV/zotus.fasta
 
+conda activate py2
+
+python /mnt/home/benucci/python_scripts/rdp_to_standard_taxonomy.py taxonomy_assignments/otus_taxonomy_RDP.txt taxonomy_assignments/otus_taxonomy_stand_RDP.txt
+python /mnt/home/benucci/python_scripts/rdp_to_standard_taxonomy.py taxonomy_assignments/zotus_taxonomy_RDP.txt taxonomy_assignments/zotus_taxonomy_stand_RDP.txt
+
+conda deactivate 
+
+# SINTAX taxonomy using SILVA
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -makeudb_sintax /mnt/home/benucci/DATABASES/silva_16s_v123.fa -output /mnt/home/benucci/DATABASES/sintax_silva_16s_v123.db
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -sintax /mnt/home/benucci/miseq_16s_deep_core_GLBRC/16s_analysis/clustered_OTU_ESV/otus.fasta -db /mnt/home/benucci/DATABASES/sintax_silva_16s_v123.db -tabbedout otu_taxonomy_SILVA.txt -strand both -sintax_cutoff 0.8
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 -sintax /mnt/home/benucci/miseq_16s_deep_core_GLBRC/16s_analysis/clustered_OTU_ESV/zotus.fasta -db /mnt/home/benucci/DATABASES/sintax_silva_16s_v123.db -tabbedout zotu_taxonomy_SILVA.txt -strand both -sintax_cutoff 0.8
+
+mv otu_taxonomy_SILVA.txt taxonomy_assignments/
+mv zotu_taxonomy_SILVA.txt taxonomy_assignments/
