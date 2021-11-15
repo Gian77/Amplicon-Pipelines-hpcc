@@ -1,0 +1,28 @@
+#!/bin/bash --login
+
+#SBATCH --time=03:00:00      
+#SBATCH --ntasks=1           
+#SBATCH --cpus-per-task=20   
+#SBATCH --mem=32G   
+#SBATCH --job-name  md5sum
+#SBACTH -A shade-cole-bonito
+
+cd ${SLURM_SUBMIT_DIR}
+
+module load FastQC/0.11.7-Java-1.8.0_162
+module load icc/2018.1.163-GCC-6.4.0-2.28
+module load ifort/2018.1.163-GCC-6.4.0-2.28
+module load impi/2018.1.163
+
+cd ${SLURM_SUBMIT_DIR}
+
+cd raw_reads/
+
+for i in *.fastq
+do echo "$i : `grep -c "^+$" $i`"
+done > ../stats/reads_raw.txt
+
+fastqc ./*R1_001.fastq
+fastqc ./*R2_001.fastq 
+
+scontrol show job $SLURM_JOB_ID
