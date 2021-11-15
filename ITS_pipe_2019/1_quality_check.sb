@@ -1,30 +1,25 @@
-#!/bin/bash -login
- 
-#SBATCH --time=02:00:00					### limit of wall clock time - how long the job will run (same as -t)
-#SBATCH --ntasks=1					### number of tasks - how many tasks (nodes) that you require (same as -n)
-#SBATCH --cpus-per-task=10				### number of CPUs (or cores) per task (same as -c)
-#SBATCH --mem=16G					### memory required per node - amount of memory (in bytes)
-#SBATCH --job-name prefiltering				### you can give your job a name for easier identification (same as -J)
+#!/bin/bash --login
 
-
-# loading modules
-module load FastQC/0.11.7-Java-1.8.0_162
-module load icc/2018.1.163-GCC-6.4.0-2.28
-module load ifort/2018.1.163-GCC-6.4.0-2.28
-module load impi/2018.1.163
-module load Bowtie2/2.3.4.1
+#SBATCH --time=00:30:00      
+#SBATCH --ntasks=1           
+#SBATCH --cpus-per-task=10   
+#SBATCH --mem=16G   
+#SBATCH --job-name  md5sum
+#SBACTH -A shade-cole-bonito
 
 cd ${SLURM_SUBMIT_DIR}
 
-mkdir stats
+cd raw_reads
 
-cd raw_reads/
+md5sum GLBRC_ITS_biodiv_S1_L001* > md5_new.txt
 
-for i in *.fastq
-do echo "$i : `grep -c "^+$" $i`"
-done > ../stats/reads_raw.txt
+file1="/mnt/home/benucci/amplicon_ITS_20211015_BCSE/raw_reads/md5.txt"
+file2="/mnt/home/benucci/amplicon_ITS_20211022_BCSE/raw_reads/md5_new.txt"
 
-fastqc ./*R1_001.fastq
-fastqc ./*R2_001.fastq 
+if cmp -s "$file1" "$file2"; then
+    printf 'The file "%s" is the same as "%s"\n' "$file1" "$file2"
+else
+    printf 'The file "%s" is different from "%s"\n' "$file1" "$file2"
+fi
 
-
+scontrol show job $SLURM_JOB_ID
