@@ -1,0 +1,25 @@
+#!/bin/bash --login
+
+#SBATCH --time=00:30:00      
+#SBATCH --ntasks=1           
+#SBATCH --cpus-per-task=10   
+#SBATCH --mem=16G   
+#SBATCH --job-name  md5sum
+#SBACTH -A shade-cole-bonito
+
+cd ${SLURM_SUBMIT_DIR}
+
+cd raw_reads
+
+md5sum GLBRC_ITS_biodiv_S1_L001* > md5_new.txt
+
+file1="/mnt/home/benucci/amplicon_ITS_20211015_BCSE/raw_reads/md5.txt"
+file2="/mnt/home/benucci/amplicon_ITS_20211022_BCSE/raw_reads/md5_new.txt"
+
+if cmp -s "$file1" "$file2"; then
+    printf 'The file "%s" is the same as "%s"\n' "$file1" "$file2"
+else
+    printf 'The file "%s" is different from "%s"\n' "$file1" "$file2"
+fi
+
+scontrol show job $SLURM_JOB_ID
