@@ -1,0 +1,40 @@
+#!/bin/bash --login
+
+#SBATCH --time=02:00:00    
+#SBATCH --ntasks=1         
+#SBATCH --cpus-per-task=20 
+#SBATCH --mem=32G         
+#SBATCH --job-name filterPhix 
+#SBACTH -A shade-cole-bonito
+
+module load icc/2018.1.163-GCC-6.4.0-2.28
+module load ifort/2018.1.163-GCC-6.4.0-2.28
+module load impi/2018.1.163
+module load Bowtie2/2.3.4.1
+
+cd ${SLURM_SUBMIT_DIR}
+
+mkdir stats
+mkdir no_phix
+
+bowtie2 \
+-x /mnt/home/benucci/phix_index/my_phix \
+-U demultiplexed_R1/seqs_new.fastq \
+-t \
+-p 20 \
+--un no_phix/seqs_new_R1.nophix.fastq \
+-S no_phix/seqs_new_R1.contaminated_align.sam 2> no_phix/seqs_new_R1.nophix.log
+
+bowtie2 \
+-x /mnt/home/benucci/phix_index/my_phix \
+-U demultiplexed_R2/seqs_new.fastq \
+-t \
+-p 20 \
+--un no_phix/seqs_new_R2.nophix.fastq \
+-S no_phix/seqs_new_R2.contaminated_align.sam 2> no_phix/seqs_new_R2.nophix.log
+
+for i in no_phix/*.nophix.fastq
+do echo "$i : `grep -c "^+$" $i`"
+done > stats/reads_no_phix.txt
+
+scontrol show job $SLURM_JOB_ID
