@@ -1,0 +1,50 @@
+#!/bin/bash --login
+
+#SBATCH --time=03:00:00      
+#SBATCH --ntasks=1           
+#SBATCH --cpus-per-task=20   
+#SBATCH --mem=32G   
+#SBATCH --job-name  strip
+#SBACTH -A shade-cole-bonito
+
+cd ${SLURM_SUBMIT_DIR}
+
+mkdir stripped/
+
+module load GCC/5.4.0-2.26  OpenMPI/1.10.3-CUDA
+module load seqtk
+
+conda activate py38
+
+cutadapt \
+-g CTTGGTCATTTAGAGGAAGTAA \
+-e 0.01 \
+--discard-untrimmed \
+--match-read-wildcards \
+no_phix/seqs_new_R1.nophix.fastq > stripped/stripped_R1.fastq
+
+cutadapt \
+-g TCCTCCGCTTATTGATATGC \
+-e 0.01 \
+--discard-untrimmed \
+--match-read-wildcards \
+no_phix/seqs_new_R2.nophix.fastq > stripped/stripped_R2.fastq
+
+conda deactivate
+
+seqtk sample -s100 stripped/stripped_R1.fastq 500 > stripped/sub_stripped_R1.fastq
+seqtk seq -aQ64 stripped/sub_stripped_R1.fastq > stripped/sub_stripped_R1.fasta
+
+seqtk sample -s100 stripped/stripped_R2.fastq 500 > stripped/sub_stripped_R2.fastq       
+seqtk seq -aQ64 stripped/sub_stripped_R2.fastq > stripped/sub_stripped_R2.fasta
+
+for fastq in stripped/*.fastq                                                                           
+do echo "$fastq : `grep -c "^+$" $fastq`" 
+done > stats/stripped.txt
+
+scontrol show job $SLURM_JOB_ID 
+
+# -n trimming more than one adapter each read
+# -e expected error rate (default 10%)
+# --discard-untrimmed discards the pair if one of the reads does not contain an adapter
+# --match-read-wildcards All IUPAC nucleotide codes (wildcard characters) are supported
