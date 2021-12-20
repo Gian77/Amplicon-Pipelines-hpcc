@@ -1,0 +1,56 @@
+#!/bin/bash --login
+
+#SBATCH --time=16:00:00    
+#SBATCH --ntasks=2         
+#SBATCH --cpus-per-task=20 
+#SBATCH --mem=64G         
+#SBATCH --job-name uparse
+
+cd ${SLURM_SUBMIT_DIR}
+
+mkdir clustered_USEARCH/
+
+# dereplication 
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-threads $SLURM_CPUS_PER_TASK \
+-fastx_uniques filtered/filtered_R1.fastq \
+-fastaout clustered_USEARCH/uniques_R1.fasta \
+-sizeout
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-threads $SLURM_CPUS_PER_TASK \
+-fastx_uniques filtered/filtered_R2.fastq \
+-fastaout clustered_USEARCH/uniques_R2.fasta \
+-sizeout
+
+#UPARSE 97% OTUs
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-threads $SLURM_CPUS_PER_TASK \
+-minsize 2 \
+-relabel OTU_ \
+-cluster_otus clustered_USEARCH/uniques_R1.fasta \
+-otus clustered_USEARCH/otus_R1.fasta \
+-uparseout clustered_USEARCH/uparse_otus_R1.txt
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-threads $SLURM_CPUS_PER_TASK \
+-otutab demultiplexed_R1/seqs_new.fastq \
+-otus clustered_USEARCH/otus_R1.fasta \
+-otutabout clustered_USEARCH/otu_table_ITS_UPARSE_R1.txt
+
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-threads $SLURM_CPUS_PER_TASK \
+-minsize 2 \
+-relabel OTU_ \
+-cluster_otus clustered_USEARCH/uniques_R2.fasta \
+-otus clustered_USEARCH/otus_R2.fasta \
+-uparseout clustered_USEARCH/uparse_otus_R2.txt
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-threads $SLURM_CPUS_PER_TASK \
+-otutab demultiplexed_R2/seqs_new.fastq \
+-otus clustered_USEARCH/otus_R2.fasta \
+-otutabout clustered_USEARCH/otu_table_ITS_UPARSE_R2.txt
+
+scontrol show job $SLURM_JOB_ID 
