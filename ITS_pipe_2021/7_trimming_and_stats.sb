@@ -1,0 +1,43 @@
+#!/bin/bash --login
+
+#SBATCH --time=06:00:00    
+#SBATCH --ntasks=1         
+#SBATCH --cpus-per-task=20 
+#SBATCH --mem=32G         
+#SBATCH --job-name stats 
+
+cd ${SLURM_SUBMIT_DIR}
+
+mkdir filtered
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-fastq_filter stripped/stripped_R1.fastq \
+-fastq_stripleft 45 \
+-fastqout stripped/trimmed_R1.fastq 
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-fastq_filter stripped/stripped_R2.fastq \
+-fastq_stripleft 32 \
+-fastqout stripped/trimmed_R2.fastq
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-fastq_eestats2 stripped/trimmed_R1.fastq \
+-output stats/eestats2_R1.txt \
+-length_cutoffs 100,500,1
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-fastq_eestats2 stripped/trimmed_R2.fastq \
+-output stats/eestats2_R2.txt \
+-length_cutoffs 100,500,1
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-fastx_info stripped/trimmed_R1.fastq \
+-secs 5 \
+-output stats/fastxinfo_R1.txt
+
+/mnt/research/rdp/public/thirdParty/usearch11.0.667_i86linux64 \
+-fastx_info stripped/trimmed_R2.fastq \
+-secs 5 \
+-output stats/fastxinfo_R2.txt
+
+scontrol show job $SLURM_JOB_ID
