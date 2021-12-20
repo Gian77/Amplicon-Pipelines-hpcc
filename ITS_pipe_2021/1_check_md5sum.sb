@@ -5,7 +5,6 @@
 #SBATCH --cpus-per-task=10   
 #SBATCH --mem=16G   
 #SBATCH --job-name  md5sum
-#SBACTH -A shade-cole-bonito
 
 cd ${SLURM_SUBMIT_DIR}
 
